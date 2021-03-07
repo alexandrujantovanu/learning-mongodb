@@ -1,0 +1,14 @@
+Work with previous imported data for usersdb.
+
+Drop database:
+db.dropDatabase()
+
+Delete filtered document:
+db.users.deleteMany({age: {$gt: 30}, isSporty: true})
+
+Exists doesn't find fields with values set to null:
+db.users.deleteMany({age: {$exists: false})   
+
+Delete all docs in a collection:
+db.users.deleteMany({})
+Only for dev purpose: db.users.drop()
