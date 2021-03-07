@@ -1,0 +1,27 @@
+db.users.find({hobbies: {$elemMatch: {title: "Sports", frequency: {$gte: 3}}}}).pretty()
+
+Updating matched array elements found with ".$" with addition of highFrequency field: 
+db.users.updateMany({hobbies: {$elemMatch: {title: "Sports", frequency: {$gte: 3}}}}, {$set:{"hobbies.$.highFrequency": true}})                                                               
+
+Updating all elements from array hobbies using "$[]":
+db.users.updateMany({age: {$gte: 30}}, {$inc: {"hobbies.$[].frequency": -1}})
+
+Updating specific elements from array using arrayFilter, adding them a property:
+b.users.updateMany({"hobbies.frequency": {$gte: 2}}, {$set: {"hobbies.$[el].goodFrequency": true}}, {arrayFilters: [{"el.frequency": {$gte: 2}}]})
+
+Pushing element to array with "$push":
+db.users.updateOne({name: "Maria"}, {$push: {hobbies: {title: "Sports", frequency: 2}}})
+
+Pushing multiple elements to array with "$each" sorted by field using "$sort" and (might also use $slice):
+!Note: alows to push duplicate values
+db.users.updateOne({name: "Maria"}, {$push: {hobbies: {$each: [{title: "Wine", frequency: 10}, {title: "Hiking", frequency: 2}], $sort: {frequency: -1}}}})
+
+Pulling specific element from array:
+db.users.updateOne({name: "Maria"}, {$pull: {"hobbies": {title: "Hiking"}}})
+
+Pulling the last element from array using pop (1 - last, "-1" - first element):
+db.users.updateOne({name: "Chris"}, {$pop: {hobbies: 1}})
+
+Add to array ("addToSet")
+Note: doesn't allow duplicate values
+db.users.updateOne({name: "Chris"}, {$addToSet: {hobbies: {title: "Cooking", frequency: 7}}})

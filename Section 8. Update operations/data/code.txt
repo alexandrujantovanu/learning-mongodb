@@ -1,0 +1,2 @@
+Execute for importing training data from root folder "learning-mongodb":
+mongoimport "Section 8. Update operations"/data/users.json -d usersdb -c users --jsonArray
