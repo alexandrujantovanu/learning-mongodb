@@ -1,0 +1,6 @@
+show dbs
+use usersdb
+db.sports.update({title: "Football"}, {$set: {requiresTeam: true}}, {upsert: true})
+db.sports.update({title: "Basketball"}, {$set: {requiresTeam: true}}, {upsert: true})
+db.sports.updateMany({requiresTeam: true}, {$set: {minTeamAmount: 5}})
+db.sports.updateMany({requiresTeam: true}, {$inc: {minTeamAmount: 10}})
