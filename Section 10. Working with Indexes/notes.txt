@@ -1,0 +1,80 @@
+We can think of the index as a simple list of values + pointers to the original document.
+
+Get all indexes on a collection:
+ db.collectionName.getIndexes()
+
+Import persons.json collection(5000 docs)
+mongoimport "Section 10. Working with Indexes"/"persons.json" -d contactData -c contacts --jsonArray
+
+People older then 60:
+db.contacts.find({"dob.age": {$gt: 60}}).pretty()
+
+Amount of documents:
+db.contacts.find({"dob.age": {$gt: 60}}).count() => 1222 documents
+
+
+See the statistics like execution time and stages:
+db.contacts.explain().find({"dob.age": {$gt: 60}})
+db.contacts.explain("executionStats").find({"dob.age": {$gt: 60}})
+
+Add index of field dob.age:
+db.contacts.createIndex({"dob.age": 1})
+
+Run below command and see how executionTimeMillis lowered, and that it did IXSCAN:
+db.contacts.explain("executionStats").find({"dob.age": {$gt: 60}})
+
+See that for grater than 20 it returns all docs because there is no younger ages
+and that it takes longer than without index(5000 docs):
+db.contacts.explain("executionStats").find({"dob.age": {$gt: 20}})
+
+Drop created index:
+db.contacts.dropIndex({"dob.age": 1})
+Run code below, and see that it is way faster without index:
+db.contacts.explain("executionStats").find({"dob.age": {$gt: 20}})
+
+Create index for text value field:
+db.contacts.createIndex({gender: 1})
+
+db.contacts.explain("executionStats").find({gender: "male"})
+
+Creating compound index:
+db.contacts.createBox({"dob.age": 1, gender: 1})
+
+Search using index works left to right for compund index:
+db.contacts.explain("executionStats").find({"dob.age": 25})
+
+Indexes also help with sorting:
+db.contacts.explain().find({"dob.age": 35}).sort({gender: 1})
+
+!Note: 
+If we are not using indexes, and we do a sort on a large amount
+of documents, we can actually timeout, because MongoDB has a threshold
+of 32MB in memory for sorting. And if we have no index, MongoDB will 
+essentially fetch all documents into memory and do the sort there.
+And for large collections, a large amount of fetched data, this 
+can be simply too much to then sort.
+So sometimes, we need Index not only to speed up queries, but also 
+to be able to sort at all(when we have millions od documents).
+
+Create unique index:
+db.contacts.createIndex({email: 1}, {unique: true})
+
+Unique indexes ensure data consistency and help us 
+to avoid duplicate data for fields for fields that
+we need to have unique.
+
+Create partial index:
+db.contacts.createIndex({"dob.age": 1}, {partialFilterExpression: {gender: "male" }})
+db.contacts.createIndex({"dob.age": 1}, {partialFilterExpression: {"dob.age": {$gt: 60}}})
+
+db.contacts.explain().find({"dob.age": {$gt: 60}, gender: "male"})
+
+Adding a partial index for the fields where email exists:
+db.users.createIndex({email: 1}, {unique: true, partialFilterExpression: {email: {$exists: true}}})
+
+Adding an index with expiry time.
+Whenever we have a usecase when data should cleanup itself,
+we don't need to write a complex script for that,
+we can use a "Time-To-Live index" with expireAfterSeconds,
+it works only on a single field, not on compound indexes:
+db.sessions.createIndex({createdAt: 1}, {expireAfterSeconds: 10})
