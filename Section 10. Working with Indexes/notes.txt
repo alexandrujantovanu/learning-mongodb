@@ -78,3 +78,83 @@ we don't need to write a complex script for that,
 we can use a "Time-To-Live index" with expireAfterSeconds,
 it works only on a single field, not on compound indexes:
 db.sessions.createIndex({createdAt: 1}, {expireAfterSeconds: 10})
+
+Covered queries:
+db.customers.explain("executionStats").find({name: "Max"}, {_id: 0, name: 1})
+
+Display all plans execution:
+db.customers.explain("allPlansExecution").find({name: "Max", age: 30})
+
+Inserting a value into contacts,
+for example of indexing arrays (multi-key index)
+db.contacts.insertOne({name: "Alex", hobbies: ["Cooking", "Sports"], addresses: [{street: "Main Street"}, {street: "Second Street"}]})
+
+Create index on array:
+db.contacts.createIndex({hobbies: 1})
+
+Creation of compound index with 2/more multi-key indexes(arrays) doesn't work:
+db.contacts.createIndex({addresses: 1, hobbies: 1}) // not working
+
+<-----Text indexes----->
+You may have only one text index per document!
+Dropping text indexes is available only by name
+db.products.dropIndex("indexName")
+When adding $weights helps put the weight on the field \n
+that holds the most important keywords
+Some find parameters for text index:
+$caseSensitive: true/false
+$language: "languageName"
+
+Inserting data:
+db.products.insertMany([{title: "A book", description: "This is an awesome book about an young artist"}, {title: "Red T-shirt", description: "This T-shirt is red and is pretty awesome"}])  
+
+Creating text index:
+db.products.createIndex({description: "text"})
+
+Search:
+db.products.find({$text: {$search: "awesome"}}).pretty()
+db.products.find({$text: {$search: "book"}}).pretty()
+
+Search a phrase with \"here goes phrase\":
+db.products.find({$text: {$search: "\"red book\""}}).pretty() //not present
+db.products.find({$text: {$search: "\"awesome book\""}}).pretty() // present
+
+Getting a score, mongodb asigned to the result:
+db.products.find({$text: {$search: "awesome t-shirt"}}, {score: {$meta: "textScore"}}).pretty()
+
+Sorting the result by score:
+db.products.find({$text: {$search: "awesome t-shirt"}}, {score: {$meta: "textScore"}}).sort({score: {$meta: "textScore"}}).pretty()
+
+Dropping text index:
+db.products.dropIndex("description_text")
+
+Create combined text index:
+db.products.createIndex({title: "text", description: "text"})
+
+Adding one more products:
+db.products.insertOne({title: "A ship", description: "Floats perfectly"})
+
+Search (this time we are able to search on both attributes):
+db.products.find({$text: {$search: "book"}}).pretty()
+db.products.find({$text: {$search: "ship"}}).pretty()
+
+Search with excluded words using (-):
+db.products.find({$text: {$search: "awesome -t-shirt"}}).pretty() 
+
+Drop combined index by name:
+db.products.dropIndex("title_text_description_text")
+
+Create text indexes with configuration (default_language and weights):
+db.products.createIndex({title: "text", description: "text"}, 
+{default_language: "english", weights: {title: 1, descriptioon: 10}})
+
+db.products.find({$text: {$search: "red"}}, {score: {$meta: "textScore"}}).pretty()
+
+Open a new terminal:
+run: mongo credit-rating.js
+wait until db will be populated with 1 000 000 documents.
+
+db.ratings.createIndex({age: 1})
+db.ratings.explain("executionStats").find({age: {$gt: 80}})
+db.ratings.dropIndex({age: 1})
+db.ratings.explain("executionStats").find({age: {$gt: 80}})
