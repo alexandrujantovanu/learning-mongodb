@@ -1,0 +1,52 @@
+    [
+    {
+            "name" : "Restaurant Oliva",
+            "location" : {                                                                                        
+                    "type" : "Point",
+                    "coordinates" : [
+                            47.7611565,
+                            27.9269148
+                    ]
+            }
+    },
+    {
+            "name" : "Primaria Balti",
+            "location" : {
+                    "type" : "Point",
+                    "coordinates" : [
+                            47.7609978,
+                            27.9272742
+                    ]
+            }
+    },
+    {
+            "name" : "Teatru National \"Vasile Alecsandri\"",
+            "location" : {
+                    "type" : "Point",
+                    "coordinates" : [
+                            47.7605729,
+                            27.9270023
+                    ]
+            }
+    },
+    {
+            "name" : "Atehno",
+            "location" : {
+                    "type" : "Point",
+                    "coordinates" : [
+                            47.7598119,
+                            27.922689
+                    ]
+            }
+    },
+    {
+            "name" : "Balteanca",
+            "location" : {
+                    "type" : "Point",
+                    "coordinates" : [
+                            47.7579016,
+                            27.9258136
+                    ]
+            }
+    }
+]

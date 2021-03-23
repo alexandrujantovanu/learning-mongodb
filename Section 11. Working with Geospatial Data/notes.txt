@@ -1,0 +1,56 @@
+Links:
+GeoJSON - https://docs.mongodb.com/manual/reference/geojson/
+
+Create database:
+use awesomeplaces
+
+Insert one place:
+db.places.insertOne({name: "Restaurant Oliva", location: {type: "Point", coordinates: [47.7611565, 27.9269148]}})
+db.places.findOne()
+
+Find near place:
+db.places.find({location: {$near: {$geometry: {type: "Point", coordinates: [47.7611565, 27.9269148]}}}})
+it will return an error, telling that no index found for $geoNear
+
+Create geospacial index:
+db.places.createIndex({location: "2dsphere"})
+
+Now it works:
+db.places.find({location: {$near: {$geometry: {type: "Point", coordinates: [47.7611565, 27.9269148]}}}})
+
+Find with min & max distance:
+db.places.find({location: {$near: {$geometry: {type: "Point", coordinates: [47.7611565, 27.9269148]}, $maxDistance: 30, $minDistance: 10}}}).pretty()
+
+Adding more places:
+Copy places.json data array and insert with db.places.insert({...})
+
+Add point constants:
+const p1 = [47.7609, 27.92434];
+const p2 = [47.7592, 27.93072];
+const p3 = [47.75437, 27.92636];
+const p4 = [47.75802, 27.91807];
+
+
+Find places in the polygon area:
+db.places.find({location: {$geoWithin: {$geometry: {type: "Polygon", coordinates: [[p1,p2,p3,p4,p1]]}}}}).pretty()
+
+Insert an area:
+db.areas.insertOne({name: "O parte din centru", area: {type: "Polygon", coordinates: [[p1,p2,p3,p4,p1]]}})
+
+Create index for geo data in collection above:
+db.areas.createIndex({area: "2dsphere"})
+
+See if point intersects area(is present in polygon coordinates):
+db.areas.find({area: {$geoIntersects: {$geometry: {type: "Point", coordinates: [47.75775, 27.92207]}}}})
+
+User outside the polygon coordinates:
+db.areas.find({area: {$geoIntersects: {$geometry: {type: "Point", coordinates: [47.75682, 27.93048]}}}})
+
+Note! We can also see if ares are in ares.
+
+Find in 150 meters radius:
+Value for km: 6378.1
+db.places.find({location: {$geoWithin: {$centerSphere: [[47.75972, 27.92634 ], 0.15 / 6378.1]}}}).pretty()
+
+Note! Comparing to $near, radius method keeps the list unordered(unsorted).
+
